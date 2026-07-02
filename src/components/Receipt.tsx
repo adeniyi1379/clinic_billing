@@ -1,4 +1,3 @@
-import { Activity } from 'lucide-react'
 import type { Transaction, TransactionItem, HospitalSettings } from '../lib/types'
 import { PAYMENT_METHOD_LABELS, PAYMENT_STATUS_LABELS } from '../lib/types'
 import { formatCurrency, formatDateTime } from '../lib/format'
@@ -14,136 +13,167 @@ export function Receipt({ transaction, items, settings }: ReceiptProps) {
   const prefix = settings?.receipt_prefix || 'RCP'
 
   return (
-    <div className="print-area bg-white text-slate-900 mx-auto" style={{ maxWidth: '80mm', padding: '8mm 6mm', fontFamily: 'JetBrains Mono, monospace', fontSize: '11px', lineHeight: '1.5' }}>
-      {/* Header */}
-      <div className="text-center mb-2">
+    <div
+      className="print-area bg-white text-black mx-auto"
+      style={{
+        width: '80mm',
+        maxWidth: '80mm',
+        padding: '2mm 3mm',
+        fontFamily: '"JetBrains Mono", "Courier New", monospace',
+        fontSize: '11px',
+        lineHeight: '1.5',
+        color: '#000',
+      }}
+    >
+      {/* Hospital header */}
+      <div style={{ textAlign: 'center', marginBottom: '2mm' }}>
         {settings?.logo_url ? (
-          <img src={settings.logo_url} alt="logo" style={{ maxHeight: '40px', margin: '0 auto 4px' }} />
-        ) : (
-          <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '32px', height: '32px', borderRadius: '6px', background: '#186048', margin: '0 auto 4px' }}>
-            <Activity size={18} color="white" />
-          </div>
-        )}
-        <div style={{ fontSize: '14px', fontWeight: 700 }}>{settings?.name || 'City General Hospital'}</div>
-        {settings?.address && <div style={{ fontSize: '10px' }}>{settings.address}</div>}
+          <img src={settings.logo_url} alt="logo" style={{ maxHeight: '40px', margin: '0 auto 2mm', display: 'block' }} />
+        ) : null}
+        <div style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          {settings?.name || 'City General Hospital'}
+        </div>
+        {settings?.address && <div style={{ fontSize: '10px', marginTop: '1px' }}>{settings.address}</div>}
         {settings?.phone && <div style={{ fontSize: '10px' }}>Tel: {settings.phone}</div>}
         {settings?.email && <div style={{ fontSize: '10px' }}>{settings.email}</div>}
+        {settings?.website && <div style={{ fontSize: '10px' }}>{settings.website}</div>}
       </div>
 
-      <div style={{ borderTop: '1px dashed #999', borderBottom: '1px dashed #999', padding: '4px 0', margin: '6px 0', textAlign: 'center', fontWeight: 700, fontSize: '12px' }}>
+      <DashedLine />
+
+      <div style={{ textAlign: 'center', fontWeight: 700, fontSize: '12px', padding: '1mm 0' }}>
         PAYMENT RECEIPT
       </div>
 
+      <DashedLine />
+
       {/* Receipt meta */}
-      <table style={{ width: '100%', fontSize: '11px' }}>
+      <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
         <tbody>
-          <tr>
-            <td style={{ padding: '1px 0' }}><strong>Receipt #:</strong></td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{transaction.receipt_number}</td>
-          </tr>
-          <tr>
-            <td style={{ padding: '1px 0' }}><strong>Date:</strong></td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{formatDateTime(transaction.transaction_date)}</td>
-          </tr>
-          <tr>
-            <td style={{ padding: '1px 0' }}><strong>Customer:</strong></td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{transaction.customer_name}</td>
-          </tr>
-          {transaction.card_number && (
-            <tr>
-              <td style={{ padding: '1px 0' }}><strong>Card No:</strong></td>
-              <td style={{ padding: '1px 0', textAlign: 'right' }}>{transaction.card_number}</td>
-            </tr>
-          )}
-          {transaction.phone_number && (
-            <tr>
-              <td style={{ padding: '1px 0' }}><strong>Phone:</strong></td>
-              <td style={{ padding: '1px 0', textAlign: 'right' }}>{transaction.phone_number}</td>
-            </tr>
-          )}
-          <tr>
-            <td style={{ padding: '1px 0' }}><strong>Served by:</strong></td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{transaction.staff_name}</td>
-          </tr>
+          <MetaRow label="Receipt No:" value={transaction.receipt_number} />
+          <MetaRow label="Date:" value={formatDateTime(transaction.transaction_date)} />
+          <MetaRow label="Customer:" value={transaction.customer_name} />
+          {transaction.card_number && <MetaRow label="Card No:" value={transaction.card_number} />}
+          {transaction.phone_number && <MetaRow label="Phone:" value={transaction.phone_number} />}
+          <MetaRow label="Served By:" value={transaction.staff_name} />
         </tbody>
       </table>
 
-      <div style={{ borderTop: '1px dashed #999', margin: '6px 0' }} />
+      <DashedLine />
 
-      {/* Items */}
-      <table style={{ width: '100%', fontSize: '10px' }}>
+      {/* Items header */}
+      <table style={{ width: '100%', fontSize: '10px', borderCollapse: 'collapse' }}>
         <thead>
-          <tr style={{ borderBottom: '1px solid #999' }}>
-            <th style={{ textAlign: 'left', padding: '2px 0' }}>Service</th>
-            <th style={{ textAlign: 'center', padding: '2px 0' }}>Qty</th>
-            <th style={{ textAlign: 'right', padding: '2px 0' }}>Amount</th>
+          <tr style={{ borderBottom: '1px dashed #000' }}>
+            <th style={{ textAlign: 'left', padding: '1mm 0', fontWeight: 700 }}>Item</th>
+            <th style={{ textAlign: 'center', padding: '1mm 0', fontWeight: 700, width: '8mm' }}>Qty</th>
+            <th style={{ textAlign: 'right', padding: '1mm 0', fontWeight: 700, width: '22mm' }}>Amount</th>
           </tr>
         </thead>
         <tbody>
           {items.map((it) => (
             <tr key={it.id} style={{ verticalAlign: 'top' }}>
-              <td style={{ padding: '2px 0' }}>
+              <td style={{ padding: '1mm 0' }}>
                 <div style={{ fontWeight: 600 }}>{it.service_name}</div>
-                {it.description && <div style={{ fontSize: '9px', color: '#666' }}>{it.description}</div>}
-                <div style={{ fontSize: '9px', color: '#666' }}>{formatCurrency(it.unit_price, symbol)} each</div>
+                {it.description && <div style={{ fontSize: '9px', color: '#333' }}>{it.description}</div>}
+                <div style={{ fontSize: '9px', color: '#333' }}>
+                  {it.quantity} x {formatCurrency(it.unit_price, symbol)}
+                </div>
               </td>
-              <td style={{ padding: '2px 0', textAlign: 'center' }}>{it.quantity}</td>
-              <td style={{ padding: '2px 0', textAlign: 'right' }}>{formatCurrency(it.total_amount, symbol)}</td>
+              <td style={{ padding: '1mm 0', textAlign: 'center' }}>{it.quantity}</td>
+              <td style={{ padding: '1mm 0', textAlign: 'right', fontWeight: 600 }}>
+                {formatCurrency(it.total_amount, symbol)}
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <div style={{ borderTop: '1px dashed #999', margin: '6px 0' }} />
+      <DashedLine />
 
       {/* Totals */}
-      <table style={{ width: '100%', fontSize: '11px' }}>
+      <table style={{ width: '100%', fontSize: '11px', borderCollapse: 'collapse' }}>
         <tbody>
           <tr>
-            <td style={{ padding: '1px 0' }}>Subtotal:</td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{formatCurrency(transaction.subtotal, symbol)}</td>
+            <td style={{ padding: '0.5mm 0' }}>Subtotal:</td>
+            <td style={{ padding: '0.5mm 0', textAlign: 'right' }}>{formatCurrency(transaction.subtotal, symbol)}</td>
           </tr>
           <tr style={{ fontWeight: 700, fontSize: '12px' }}>
-            <td style={{ padding: '2px 0', borderTop: '1px solid #999' }}>Grand Total:</td>
-            <td style={{ padding: '2px 0', textAlign: 'right', borderTop: '1px solid #999' }}>{formatCurrency(transaction.grand_total, symbol)}</td>
+            <td style={{ padding: '1mm 0', borderTop: '1px solid #000' }}>GRAND TOTAL:</td>
+            <td style={{ padding: '1mm 0', textAlign: 'right', borderTop: '1px solid #000' }}>
+              {formatCurrency(transaction.grand_total, symbol)}
+            </td>
           </tr>
           <tr>
-            <td style={{ padding: '1px 0' }}>Amount Paid:</td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{formatCurrency(transaction.amount_paid, symbol)}</td>
+            <td style={{ padding: '0.5mm 0' }}>Amount Paid:</td>
+            <td style={{ padding: '0.5mm 0', textAlign: 'right' }}>{formatCurrency(transaction.amount_paid, symbol)}</td>
           </tr>
           {transaction.outstanding_balance > 0 && (
             <tr style={{ fontWeight: 700 }}>
-              <td style={{ padding: '1px 0' }}>Outstanding:</td>
-              <td style={{ padding: '1px 0', textAlign: 'right' }}>{formatCurrency(transaction.outstanding_balance, symbol)}</td>
+              <td style={{ padding: '0.5mm 0' }}>Outstanding:</td>
+              <td style={{ padding: '0.5mm 0', textAlign: 'right' }}>
+                {formatCurrency(transaction.outstanding_balance, symbol)}
+              </td>
             </tr>
           )}
           <tr>
-            <td style={{ padding: '1px 0' }}>Method:</td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{PAYMENT_METHOD_LABELS[transaction.payment_method]}</td>
+            <td style={{ padding: '0.5mm 0' }}>Method:</td>
+            <td style={{ padding: '0.5mm 0', textAlign: 'right' }}>{PAYMENT_METHOD_LABELS[transaction.payment_method]}</td>
           </tr>
           <tr>
-            <td style={{ padding: '1px 0' }}>Status:</td>
-            <td style={{ padding: '1px 0', textAlign: 'right' }}>{PAYMENT_STATUS_LABELS[transaction.payment_status]}</td>
+            <td style={{ padding: '0.5mm 0' }}>Status:</td>
+            <td style={{ padding: '0.5mm 0', textAlign: 'right' }}>{PAYMENT_STATUS_LABELS[transaction.payment_status]}</td>
           </tr>
         </tbody>
       </table>
 
       {transaction.notes && (
         <>
-          <div style={{ borderTop: '1px dashed #999', margin: '6px 0' }} />
-          <div style={{ fontSize: '10px' }}><strong>Notes:</strong> {transaction.notes}</div>
+          <DashedLine />
+          <div style={{ fontSize: '10px', padding: '1mm 0' }}>
+            <strong>Notes:</strong> {transaction.notes}
+          </div>
         </>
       )}
 
-      <div style={{ borderTop: '1px dashed #999', margin: '6px 0' }} />
+      <DashedLine />
 
       {/* Footer */}
-      <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '4px' }}>
+      <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '1mm' }}>
         <div style={{ fontWeight: 600 }}>{settings?.footer_message || 'Thank you for choosing our hospital.'}</div>
-        <div style={{ marginTop: '4px', fontSize: '9px', color: '#666' }}>
+        <div style={{ marginTop: '2mm', fontSize: '9px', color: '#333' }}>
           This is a computer-generated receipt from {prefix} system.
         </div>
+        <div style={{ marginTop: '1mm', fontSize: '9px', color: '#333' }}>
+          {formatDateTime(new Date())}
+        </div>
+      </div>
+
+      {/* Cut line indicator */}
+      <div style={{ textAlign: 'center', marginTop: '2mm', fontSize: '9px', color: '#999', letterSpacing: '2px' }}>
+        - - - - - - - - - - - - - - -
       </div>
     </div>
+  )
+}
+
+function MetaRow({ label, value }: { label: string; value: string }) {
+  return (
+    <tr>
+      <td style={{ padding: '0.5mm 0', fontWeight: 600, whiteSpace: 'nowrap' }}>{label}</td>
+      <td style={{ padding: '0.5mm 0', textAlign: 'right', paddingLeft: '2mm', wordBreak: 'break-word' }}>{value}</td>
+    </tr>
+  )
+}
+
+function DashedLine() {
+  return (
+    <div
+      style={{
+        borderTop: '1px dashed #000',
+        margin: '1mm 0',
+        height: 0,
+      }}
+    />
   )
 }

@@ -67,21 +67,53 @@
   background: #94a3b8;
 }
 
-/* Print styles for receipts */
+/* POS thermal receipt print styles (80mm) */
+@page {
+  size: 80mm auto;
+  margin: 0;
+}
+
 @media print {
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #fff !important;
+    width: 80mm !important;
+  }
+
   body * {
     visibility: hidden;
   }
+
   .print-area,
   .print-area * {
     visibility: visible;
   }
+
   .print-area {
     position: absolute;
     left: 0;
     top: 0;
-    width: 100%;
+    width: 80mm !important;
+    max-width: 80mm !important;
+    margin: 0 !important;
+    padding: 2mm 3mm !important;
+    background: #fff !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
   }
+
+  .print-area * {
+    color: #000 !important;
+    background: #fff !important;
+    box-shadow: none !important;
+    border-color: #000 !important;
+    text-shadow: none !important;
+  }
+
   .no-print {
     display: none !important;
   }

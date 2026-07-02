@@ -197,8 +197,15 @@ export function TransactionDetailPage() {
         </div>
       </div>
 
-      {/* Printable receipt */}
-      <div className="bg-slate-200 p-4 rounded-lg">
+      {/* Printable POS receipt */}
+      <div className="no-print bg-slate-200 p-4 rounded-lg flex justify-center">
+        <div className="shadow-md">
+          <Receipt transaction={transaction} items={items} settings={settings} />
+        </div>
+      </div>
+
+      {/* Hidden until print: the actual print target */}
+      <div className="hidden print:block">
         <Receipt transaction={transaction} items={items} settings={settings} />
       </div>
 
