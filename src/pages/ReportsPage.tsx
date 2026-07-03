@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback,useMemo  } from 'react'
 import { BarChart3, FileDown, FileSpreadsheet, TrendingUp, Wallet, Users, Receipt } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import { useSettingsStore } from '../store/settings'
@@ -32,7 +32,12 @@ export function ReportsPage() {
 
   useEffect(() => { loadSettings() }, [loadSettings])
 
-  const { from, to, label } = computeRange(period, customFrom, customTo)
+  // const { from, to, label } = computeRange(period, customFrom, customTo)
+  const { from, to, label } = useMemo(
+  () => computeRange(period, customFrom, customTo),
+  [period, customFrom, customTo]
+)
+
 
   const load = useCallback(async () => {
     setLoading(true)

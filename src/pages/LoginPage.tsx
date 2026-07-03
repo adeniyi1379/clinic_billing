@@ -41,7 +41,7 @@ export function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
             <Activity size={32} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">MediBill</h1>
+          <h1 className="text-2xl font-bold text-white">PeaMark</h1>
           <p className="text-brand-200 text-sm mt-1">Hospital Billing & Receipt System</p>
         </div>
 
@@ -97,17 +97,14 @@ export function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-sm text-slate-500 mt-6">
+          {/* <p className="text-center text-sm text-slate-500 mt-6">
             Don't have an account?{' '}
             <Link to="/signup" className="text-brand-600 hover:text-brand-700 font-medium">
               Create one
             </Link>
-          </p>
+          </p> */}
         </div>
 
-        <p className="text-center text-xs text-brand-200/70 mt-6">
-          The first account created becomes the administrator.
-        </p>
       </div>
     </div>
   )

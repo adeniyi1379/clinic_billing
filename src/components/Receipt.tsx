@@ -141,12 +141,12 @@ export function Receipt({ transaction, items, settings }: ReceiptProps) {
       {/* Footer */}
       <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '1mm' }}>
         <div style={{ fontWeight: 600 }}>{settings?.footer_message || 'Thank you for choosing our hospital.'}</div>
-        <div style={{ marginTop: '2mm', fontSize: '9px', color: '#333' }}>
+        {/* <div style={{ marginTop: '2mm', fontSize: '9px', color: '#333' }}>
           This is a computer-generated receipt from {prefix} system.
         </div>
         <div style={{ marginTop: '1mm', fontSize: '9px', color: '#333' }}>
           {formatDateTime(new Date())}
-        </div>
+        </div> */}
       </div>
 
       {/* Cut line indicator */}

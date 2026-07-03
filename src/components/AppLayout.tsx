@@ -99,10 +99,10 @@ export function AppLayout() {
           >
             <Menu size={20} />
           </button>
-          <div className="hidden lg:flex items-center gap-2 text-sm text-slate-500">
+          {/* <div className="hidden lg:flex items-center gap-2 text-sm text-slate-500">
             <ShieldCheck size={16} className="text-brand-600" />
             <span>Role-Based Access Control enabled</span>
-          </div>
+          </div> */}
           <div className="flex items-center gap-3 ml-auto">
             <div className="text-right hidden sm:block">
               <p className="text-sm font-medium text-slate-700">{staff?.full_name}</p>
@@ -139,7 +139,7 @@ function SidebarContent({ items, onSignOut, staffName, staffRole, initials, onNa
           <Activity size={20} className="text-white" />
         </div>
         <div>
-          <h1 className="text-white font-bold text-lg leading-none">MediBill</h1>
+          <h1 className="text-white font-bold text-lg leading-none">PeaMark</h1>
           <p className="text-brand-300 text-xs mt-0.5">Billing System</p>
         </div>
       </div>
