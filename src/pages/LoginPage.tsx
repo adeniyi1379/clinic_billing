@@ -41,7 +41,7 @@ export function LoginPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-sm border border-white/20 mb-4">
             <Activity size={32} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-white">PeaMark</h1>
+          <h1 className="text-2xl font-bold text-white">PeaMak</h1>
           <p className="text-brand-200 text-sm mt-1">Hospital Billing & Receipt System</p>
         </div>
 
