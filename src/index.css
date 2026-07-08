@@ -69,10 +69,8 @@
 
 /* POS thermal receipt print styles (80mm) */
 @page {
-  size: 80mm auto;
+  size: 80mm 105mm;
   margin: 0;
-  height: 105mm !important;
-  font-size: 9px !important;
 }
 
 @media print {
@@ -82,6 +80,7 @@
     padding: 0 !important;
     background: #fff !important;
     width: 80mm !important;
+
   }
 
   body * {
@@ -95,7 +94,8 @@
 
   .print-area {
     position: absolute;
-    
+    height: 105mm !important;
+    overflow: hidden;
     left: 0;
     top: 0;
     width: 80mm !important;
