@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Printer, Pencil, Trash2, Receipt as ReceiptIcon } from 'lucide-react'
 import { supabase } from '../lib/supabase'
@@ -10,6 +10,7 @@ import { formatCurrency, formatDateTime } from '../lib/format'
 import { hasPermission } from '../lib/permissions'
 import { logAudit } from '../lib/audit'
 import { Receipt } from '../components/Receipt'
+import { printNodeAsImage } from '../lib/receiptImage'
 import { Spinner } from '../components/ui/Spinner'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { toast } from '../components/ui/Toast'
@@ -29,6 +30,7 @@ export function TransactionDetailPage() {
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
+  const printRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { loadSettings() }, [loadSettings])
 
@@ -58,14 +60,23 @@ export function TransactionDetailPage() {
   // Auto-print on first load if ?print=1
   useEffect(() => {
     if (!loading && transaction && searchParams.get('print') === '1') {
-      const t = setTimeout(() => window.print(), 300)
+      const t = setTimeout(() => doPrint(), 400)
       return () => clearTimeout(t)
     }
   }, [loading, transaction, searchParams])
 
   const symbol = settings?.currency_symbol || '₦'
 
-  const handlePrint = () => window.print()
+  const doPrint = () => {
+    const node = printRef.current
+    if (!node) return
+    printNodeAsImage(node).catch((err) => {
+      console.error('Receipt image print failed', err)
+      toast.error('Could not generate receipt image for printing.')
+    })
+  }
+
+  const handlePrint = doPrint
 
   const handleDelete = async () => {
     if (!transaction) return
@@ -204,8 +215,12 @@ export function TransactionDetailPage() {
         </div>
       </div>
 
-      {/* Hidden until print: the actual print target */}
-      <div className="hidden print:block">
+      {/* Off-screen render target for image-based printing */}
+      <div
+        ref={printRef}
+        aria-hidden
+        style={{ position: 'absolute', left: '-9999px', top: 0, background: '#fff' }}
+      >
         <Receipt transaction={transaction} items={items} settings={settings} />
       </div>
 
