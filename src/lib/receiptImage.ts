@@ -1,13 +1,17 @@
 import html2canvas from 'html2canvas'
 
+const PRINT_IMG_ID = 'receipt-print-image'
+
 /**
- * Render a DOM node to a PNG image and open a print dialog that prints
- * only the image (no surrounding app UI). The image is rendered at high
- * resolution for crisp thermal-printer output.
+ * Render a DOM node to a PNG image and print it from the main window.
+ * Uses a print-only <img> element + @media print CSS so only the image
+ * is visible in the print dialog. This avoids iframes, which mobile
+ * browsers handle unreliably (zero-size iframes don't render content,
+ * and iframe.print() is often a no-op on mobile).
  */
 export async function printNodeAsImage(node: HTMLElement): Promise<void> {
   const canvas = await html2canvas(node, {
-    scale: 3,
+    scale: 2,
     backgroundColor: '#ffffff',
     useCORS: true,
     logging: false,
@@ -16,70 +20,76 @@ export async function printNodeAsImage(node: HTMLElement): Promise<void> {
   })
 
   const dataUrl = canvas.toDataURL('image/png')
-  printImage(dataUrl, canvas.width, canvas.height)
+
+  // Get or create the print-only image element in the main document.
+  let printImg = document.getElementById(PRINT_IMG_ID) as HTMLImageElement | null
+  if (!printImg) {
+    printImg = document.createElement('img')
+    printImg.id = PRINT_IMG_ID
+    document.body.appendChild(printImg)
+  }
+
+  // Wait for the image to finish loading before calling print,
+  // otherwise mobile browsers print a blank page.
+  await new Promise<void>((resolve, reject) => {
+    printImg!.onload = () => resolve()
+    printImg!.onerror = () => reject(new Error('Failed to load receipt image'))
+    printImg!.src = dataUrl
+  })
+
+  // Signal to the print CSS that we're in image-print mode.
+  document.body.classList.add('printing-receipt-image')
+  ensurePrintStyles()
+
+  // Defer print so the browser has time to apply the class + repaint.
+  await new Promise((r) => requestAnimationFrame(r))
+
+  window.print()
+
+  // Cleanup after printing settles.
+  setTimeout(() => {
+    document.body.classList.remove('printing-receipt-image')
+  }, 1000)
 }
 
-function printImage(dataUrl: string, width: number, height: number): void {
-  const iframe = document.createElement('iframe')
-  iframe.style.position = 'fixed'
-  iframe.style.right = '0'
-  iframe.style.bottom = '0'
-  iframe.style.width = '0'
-  iframe.style.height = '0'
-  iframe.style.border = '0'
-  document.body.appendChild(iframe)
+let stylesInjected = false
 
-  const doc = iframe.contentWindow?.document
-  if (!doc) {
-    document.body.removeChild(iframe)
-    throw new Error('Unable to open print frame')
-  }
-
-  // Convert pixel dimensions to mm assuming 96 DPI (CSS reference pixel).
-  const pxToMm = (px: number) => (px / 96) * 25.4
-  const widthMm = pxToMm(width / 3) // undo scale for physical sizing
-  const heightMm = pxToMm(height / 3)
-
-  doc.open()
-  doc.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8" />
-<style>
-  @page { size: ${widthMm.toFixed(2)}mm ${heightMm.toFixed(2)}mm; margin: 0; }
-  html, body { margin: 0; padding: 0; background: #fff; }
-  img { display: block; width: ${widthMm.toFixed(2)}mm; height: ${heightMm.toFixed(2)}mm; }
-</style>
-</head>
-<body><img src="${dataUrl}" onload="window.__imgReady = true" /></body>
-</html>`)
-  doc.close()
-
-  const win = iframe.contentWindow!
-  const cleanup = () => document.body.removeChild(iframe)
-
-  const triggerPrint = () => {
-    win.focus()
-    win.print()
-    // Give the browser a moment before removing the iframe.
-    setTimeout(cleanup, 500)
-  }
-
-  // Wait for the image to load before printing.
-  const img = doc.querySelector('img') as HTMLImageElement | null
-  if (img && img.complete && img.naturalWidth > 0) {
-    triggerPrint()
-  } else {
-    const check = setInterval(() => {
-      if ((win as any).__imgReady) {
-        clearInterval(check)
-        triggerPrint()
+function ensurePrintStyles() {
+  if (stylesInjected) return
+  const style = document.createElement('style')
+  style.id = 'receipt-image-print-styles'
+  style.textContent = `
+    @media print {
+      body.printing-receipt-image > *:not(#${PRINT_IMG_ID}) {
+        display: none !important;
       }
-    }, 50)
-    // Safety timeout
-    setTimeout(() => {
-      clearInterval(check)
-      triggerPrint()
-    }, 2000)
-  }
+      body.printing-receipt-image {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #fff !important;
+      }
+      body.printing-receipt-image #${PRINT_IMG_ID} {
+        display: block !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        max-width: 80mm !important;
+        height: auto !important;
+      }
+    }
+    @media screen {
+      #${PRINT_IMG_ID} {
+        position: absolute;
+        left: -9999px;
+        top: 0;
+        width: 0;
+        height: 0;
+        opacity: 0;
+        pointer-events: none;
+      }
+    }
+  `
+  document.head.appendChild(style)
+  stylesInjected = true
 }
