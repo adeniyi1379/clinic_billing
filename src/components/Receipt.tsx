@@ -127,16 +127,16 @@ export function Receipt({ transaction, items, settings }: ReceiptProps) {
         </tbody>
       </table>
 
-      {transaction.notes && (
+      {/* {transaction.notes && (
         <>
           <DashedLine />
           <div style={{ fontSize: '10px', padding: '1mm 0' }}>
             <strong>Notes:</strong> {transaction.notes}
           </div>
         </>
-      )}
+      )} */}
 
-      <DashedLine />
+      {/* <DashedLine /> */}
 
       {/* Footer */}
       <div style={{ textAlign: 'center', fontSize: '10px', marginTop: '1mm' }}>
