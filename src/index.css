@@ -67,56 +67,56 @@
   background: #94a3b8;
 }
 
+<<<<<<< HEAD
 /* POS thermal receipt print styles (80mm) */
 @page {
   size: 70mm 95mm;
   margin: 0;
 }
+=======
+/* POS thermal receipt print styles (image-based) */
+>>>>>>> 3efd6b72d252165894b36c6ef77eab5ac915cd8c
 @media print {
+  @page {
+    size: 80mm auto;
+    margin: 0;
+  }
+
   html,
   body {
     margin: 0 !important;
     padding: 0 !important;
     background: #fff !important;
-    width: 70mm !important;
-
   }
 
-  body * {
-    visibility: hidden;
+  /* When printing the receipt image, hide everything except the image */
+  body.printing-receipt-image > *:not(#receipt-print-image) {
+    display: none !important;
   }
 
-  .print-area,
-  .print-area * {
-    visibility: visible;
-  }
-
-  .print-area {
-    position: absolute;
-    height: 95mm !important;
-    overflow: hidden;
-    left: 0;
-    top: 0;
-    width: 70mm !important;
-    max-width: 70mm !important;
-    margin: 0 !important;
-    padding: 2mm 3mm !important;
-    background: #fff !important;
-    color: #000 !important;
-    box-shadow: none !important;
-    border: none !important;
-    border-radius: 0 !important;
-  }
-
-  .print-area * {
-    color: #000 !important;
-    background: #fff !important;
-    box-shadow: none !important;
-    border-color: #000 !important;
-    text-shadow: none !important;
+  body.printing-receipt-image #receipt-print-image {
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 80mm !important;
+    height: auto !important;
   }
 
   .no-print {
     display: none !important;
+  }
+}
+
+/* Keep the print-only image off-screen on screen, visible only during print */
+@media screen {
+  #receipt-print-image {
+    position: absolute;
+    left: -9999px;
+    top: 0;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
   }
 }
