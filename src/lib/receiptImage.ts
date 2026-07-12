@@ -1,10 +1,5 @@
 import html2canvas from 'html2canvas'
 
-/**
- * Render a DOM node to a PNG image and open a print dialog that prints
- * only the image (no surrounding app UI). The image is rendered at high
- * resolution for crisp thermal-printer output.
- */
 export async function printNodeAsImage(node: HTMLElement): Promise<void> {
   const canvas = await html2canvas(node, {
     scale: 3,
@@ -34,12 +29,10 @@ function printImage(dataUrl: string, width: number, height: number): void {
     document.body.removeChild(iframe)
     throw new Error('Unable to open print frame')
   }
-
   // Convert pixel dimensions to mm assuming 96 DPI (CSS reference pixel).
   const pxToMm = (px: number) => (px / 96) * 25.4
   const widthMm = pxToMm(width / 3) // undo scale for physical sizing
   const heightMm = pxToMm(height / 3)
-
   doc.open()
   doc.write(`<!DOCTYPE html>
 <html>
@@ -54,7 +47,6 @@ function printImage(dataUrl: string, width: number, height: number): void {
 <body><img src="${dataUrl}" onload="window.__imgReady = true" /></body>
 </html>`)
   doc.close()
-
   const win = iframe.contentWindow!
   const cleanup = () => document.body.removeChild(iframe)
 
@@ -64,7 +56,6 @@ function printImage(dataUrl: string, width: number, height: number): void {
     // Give the browser a moment before removing the iframe.
     setTimeout(cleanup, 500)
   }
-
   // Wait for the image to load before printing.
   const img = doc.querySelector('img') as HTMLImageElement | null
   if (img && img.complete && img.naturalWidth > 0) {
