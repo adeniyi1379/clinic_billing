@@ -23,6 +23,7 @@ export function Receipt({ transaction, items, settings }: ReceiptProps) {
         fontSize: '11px',
         lineHeight: '1.5',
         color: '#000',
+        boxSizing: 'border-box',
       }}
     >
       {/* Hospital header */}

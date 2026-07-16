@@ -16,29 +16,56 @@ export async function printNodeAsImage(node: HTMLElement): Promise<void> {
   })
 
   const dataUrl = canvas.toDataURL('image/png')
-  printImage(dataUrl, canvas.width, canvas.height)
+  await printImage(dataUrl, canvas.width, canvas.height)
 }
 
-function printImage(dataUrl: string, width: number, height: number): void {
-  const iframe = document.createElement('iframe')
-  iframe.style.position = 'fixed'
-  iframe.style.right = '0'
-  iframe.style.bottom = '0'
-  iframe.style.width = '0'
-  iframe.style.height = '0'
-  iframe.style.border = '0'
-  document.body.appendChild(iframe)
-
+export async function printNodeDomOnly(node: HTMLElement): Promise<void> {
+  const iframe = createPrintFrame()
   const doc = iframe.contentWindow?.document
+
   if (!doc) {
     document.body.removeChild(iframe)
     throw new Error('Unable to open print frame')
   }
 
-  // Convert pixel dimensions to mm assuming 96 DPI (CSS reference pixel).
-  const pxToMm = (px: number) => (px / 96) * 25.4
-  const widthMm = pxToMm(width / 3) // undo scale for physical sizing
-  const heightMm = pxToMm(height / 3)
+  const widthPx = Math.ceil(node.scrollWidth)
+  const heightPx = Math.ceil(node.scrollHeight)
+  const widthMm = pxToMm(widthPx)
+  const heightMm = pxToMm(heightPx)
+
+  doc.open()
+  doc.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  @page { size: ${widthMm.toFixed(2)}mm ${heightMm.toFixed(2)}mm; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  body { width: ${widthMm.toFixed(2)}mm; }
+  .receipt-print-root { width: ${widthMm.toFixed(2)}mm; background: #fff; }
+</style>
+</head>
+<body>
+  <div class="receipt-print-root">${node.innerHTML}</div>
+</body>
+</html>`)
+  doc.close()
+
+  await waitForPrintFrame(doc, iframe.contentWindow!)
+  triggerPrint(iframe)
+}
+
+async function printImage(dataUrl: string, width: number, height: number): Promise<void> {
+  const iframe = createPrintFrame()
+  const doc = iframe.contentWindow?.document
+
+  if (!doc) {
+    document.body.removeChild(iframe)
+    throw new Error('Unable to open print frame')
+  }
+
+  const widthMm = pxToMm(width / 2)
+  const heightMm = pxToMm(height / 2)
 
   doc.open()
   doc.write(`<!DOCTYPE html>
@@ -55,31 +82,58 @@ function printImage(dataUrl: string, width: number, height: number): void {
 </html>`)
   doc.close()
 
-  const win = iframe.contentWindow!
-  const cleanup = () => document.body.removeChild(iframe)
+  await waitForPrintFrame(doc, iframe.contentWindow!)
+  triggerPrint(iframe)
+}
 
-  const triggerPrint = () => {
-    win.focus()
-    win.print()
-    // Give the browser a moment before removing the iframe.
-    setTimeout(cleanup, 500)
-  }
+function createPrintFrame(): HTMLIFrameElement {
+  const iframe = document.createElement('iframe')
+  iframe.style.position = 'fixed'
+  iframe.style.right = '0'
+  iframe.style.bottom = '0'
+  iframe.style.width = '0'
+  iframe.style.height = '0'
+  iframe.style.border = '0'
+  document.body.appendChild(iframe)
+  return iframe
+}
 
-  // Wait for the image to load before printing.
+function pxToMm(px: number): number {
+  return (px / 96) * 25.4
+}
+
+async function waitForPrintFrame(doc: Document, win: Window): Promise<void> {
   const img = doc.querySelector('img') as HTMLImageElement | null
-  if (img && img.complete && img.naturalWidth > 0) {
-    triggerPrint()
-  } else {
+  if (!img) return
+  if (img.complete && img.naturalWidth > 0) return
+
+  await new Promise<void>((resolve) => {
     const check = setInterval(() => {
-      if ((win as any).__imgReady) {
+      if ((win as Window & { __imgReady?: boolean }).__imgReady) {
         clearInterval(check)
-        triggerPrint()
+        resolve()
       }
     }, 50)
-    // Safety timeout
+
     setTimeout(() => {
       clearInterval(check)
-      triggerPrint()
+      resolve()
     }, 2000)
+  })
+}
+
+function triggerPrint(iframe: HTMLIFrameElement): void {
+  const win = iframe.contentWindow
+  if (!win) {
+    document.body.removeChild(iframe)
+    return
   }
+
+  win.focus()
+  win.print()
+  setTimeout(() => {
+    if (iframe.parentNode) {
+      iframe.parentNode.removeChild(iframe)
+    }
+  }, 500)
 }
