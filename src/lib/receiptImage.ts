@@ -175,32 +175,8 @@ async function waitForDocumentReady(printWindow: Window): Promise<void> {
 }
 
 async function triggerPrint(printWindow: Window): Promise<void> {
-  await new Promise<void>((resolve) => {
-    let finished = false
-    const done = () => {
-      if (finished) return
-      finished = true
-      resolve()
-    }
-
-    const onAfterPrint = () => {
-      printWindow.removeEventListener('afterprint', onAfterPrint)
-      done()
-    }
-
-    printWindow.addEventListener('afterprint', onAfterPrint)
-    printWindow.focus()
-    printWindow.print()
-
-    setTimeout(() => {
-      printWindow.removeEventListener('afterprint', onAfterPrint)
-      done()
-    }, 1500)
-  })
-
-  setTimeout(() => {
-    safelyClosePrintWindow(printWindow)
-  }, 1000)
+  printWindow.focus()
+  printWindow.print()
 }
 
 function safelyClosePrintWindow(printWindow: Window): void {
