@@ -10,7 +10,7 @@ import { formatCurrency, formatDateTime } from '../lib/format'
 import { hasPermission } from '../lib/permissions'
 import { logAudit } from '../lib/audit'
 import { Receipt } from '../components/Receipt'
-import { printNodeAsImage, printNodeDomOnly } from '../lib/receiptImage'
+import { openReceiptPrintWindow, printNodeAsImage, printNodeDomOnly } from '../lib/receiptImage'
 import { Spinner } from '../components/ui/Spinner'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { toast } from '../components/ui/Toast'
@@ -70,12 +70,15 @@ export function TransactionDetailPage() {
   const doPrint = async () => {
     const node = printRef.current
     if (!node) return
+    let printWindow: Window | null = null
+
     try {
-      await printNodeAsImage(node)
+      printWindow = openReceiptPrintWindow()
+      await printNodeAsImage(node, printWindow)
     } catch (err) {
       console.error('Receipt image print failed', err)
       try {
-        await printNodeDomOnly(node)
+        await printNodeDomOnly(node, printWindow ?? undefined)
         toast.error('Receipt image generation failed. Printed the receipt-only fallback instead.')
       } catch (fallbackErr) {
         console.error('Receipt fallback print failed', fallbackErr)

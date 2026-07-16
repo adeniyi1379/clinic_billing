@@ -67,10 +67,6 @@
   background: #94a3b8;
 }
 
-<<<<<<< HEAD
-=======
-/* POS thermal receipt print styles (image-based) */
->>>>>>> feca98bc23351add667443dfa17ee5f29706a0ae
 @media print {
   html,
   body {
@@ -80,28 +76,6 @@
     width: 80mm !important;
   }
 
-<<<<<<< HEAD
-=======
-  /* When printing the receipt image, hide the app root (everything except the image) */
-  body.printing-receipt-image #root {
-    display: none !important;
-  }
-
-  body.printing-receipt-image #receipt-print-image {
-    display: block !important;
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 80mm !important;
-    max-width: 80mm !important;
-    height: auto !important;
-    page-break-after: avoid !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-    break-after: avoid !important;
-  }
-
->>>>>>> feca98bc23351add667443dfa17ee5f29706a0ae
   .no-print {
     display: none !important;
   }
