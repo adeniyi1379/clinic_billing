@@ -126,7 +126,7 @@ async function renderImageDocument(printWindow: Window, dataUrl: string, width: 
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      min-height: 100vh;
+      min-height: 105mm;//100vh;
     }
     img {
       display: block;
