@@ -1,5 +1,3 @@
-import html2canvas from 'html2canvas'
-
 /**
  * Open a blank receipt print window immediately from the user gesture so
  * mobile browsers do not treat it as a blocked popup.
@@ -49,36 +47,13 @@ export function openReceiptPrintWindow(): Window {
 }
 
 /**
- * Render a DOM node to a PNG image and open a print dialog that prints
- * only the image (no surrounding app UI). The image is rendered at high
- * resolution for crisp thermal-printer output.
+ * Render a DOM receipt into the blank print window as normal HTML/CSS so
+ * text stays selectable and thermal printing is lighter than raster output.
  */
-export async function printNodeAsImage(node: HTMLElement, printWindow = openReceiptPrintWindow()): Promise<void> {
-  try {
-    const canvas = await html2canvas(node, {
-      scale: 2,
-      backgroundColor: '#ffffff',
-      useCORS: true,
-      logging: false,
-      windowWidth: node.scrollWidth,
-      windowHeight: node.scrollHeight,
-    })
-
-    const dataUrl = canvas.toDataURL('image/png')
-    await renderImageDocument(printWindow, dataUrl, canvas.width, canvas.height)
-    await triggerPrint(printWindow)
-  } catch (error) {
-    safelyClosePrintWindow(printWindow)
-    throw error
-  }
-}
-
 export async function printNodeDomOnly(node: HTMLElement, printWindow = openReceiptPrintWindow()): Promise<void> {
   try {
     const widthPx = Math.ceil(node.scrollWidth)
-    const heightPx = Math.ceil(node.scrollHeight)
     const widthMm = pxToMm(widthPx)
-    const heightMm = pxToMm(heightPx)
     const doc = printWindow.document
 
     doc.open()
@@ -88,10 +63,35 @@ export async function printNodeDomOnly(node: HTMLElement, printWindow = openRece
   <meta charset="utf-8" />
   <title>Receipt Print</title>
   <style>
-    @page { size: ${widthMm.toFixed(2)}mm ${heightMm.toFixed(2)}mm; margin: 0; }
-    html, body { margin: 0; padding: 0; background: #fff; }
-    body { width: ${widthMm.toFixed(2)}mm; }
-    .receipt-print-root { width: ${widthMm.toFixed(2)}mm; background: #fff; }
+    @page {
+      margin: 0;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      background: #fff;
+      color: #000;
+    }
+
+    body {
+      width: ${widthMm.toFixed(2)}mm;
+      min-width: ${widthMm.toFixed(2)}mm;
+      font-family: "JetBrains Mono", "Courier New", monospace;
+    }
+
+    .receipt-print-root {
+      width: ${widthMm.toFixed(2)}mm;
+      min-width: ${widthMm.toFixed(2)}mm;
+      background: #fff;
+    }
+
+    .receipt-print-root * {
+      box-sizing: border-box;
+      print-color-adjust: exact;
+      -webkit-print-color-adjust: exact;
+    }
   </style>
 </head>
 <body>
@@ -106,52 +106,6 @@ export async function printNodeDomOnly(node: HTMLElement, printWindow = openRece
     safelyClosePrintWindow(printWindow)
     throw error
   }
-}
-
-async function renderImageDocument(printWindow: Window, dataUrl: string, width: number, height: number): Promise<void> {
-  const widthMm = pxToMm(width / 2)
-  const heightMm = pxToMm(height / 2)
-  const doc = printWindow.document
-
-  doc.open()
-  doc.write(`<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>Receipt Print</title>
-  <style>
-    @page { size: ${widthMm.toFixed(2)}mm ${heightMm.toFixed(2)}mm; margin: 0; }
-    html, body { margin: 0; padding: 0; background: #fff; }
-    body {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 105mm;//100vh;
-    }
-    img {
-      display: block;
-      width: ${widthMm.toFixed(2)}mm;
-      height: ${heightMm.toFixed(2)}mm;
-    }
-  </style>
-</head>
-<body></body>
-</html>`)
-  doc.close()
-
-  await waitForDocumentReady(printWindow)
-
-  const img = doc.createElement('img')
-  const imageReady = new Promise<void>((resolve, reject) => {
-    img.onload = () => resolve()
-    img.onerror = () => reject(new Error('Receipt image failed to load in print window'))
-  })
-
-  img.src = dataUrl
-  doc.body.innerHTML = ''
-  doc.body.appendChild(img)
-
-  await imageReady
 }
 
 function pxToMm(px: number): number {
@@ -169,8 +123,12 @@ async function waitForDocumentReady(printWindow: Window): Promise<void> {
       doc.removeEventListener('readystatechange', onReady)
       resolve()
     }
+
     doc.addEventListener('readystatechange', onReady)
-    setTimeout(resolve, 500)
+    setTimeout(() => {
+      doc.removeEventListener('readystatechange', onReady)
+      resolve()
+    }, 500)
   })
 }
 
