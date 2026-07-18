@@ -139,7 +139,7 @@ function SidebarContent({ items, onSignOut, staffName, staffRole, initials, onNa
           <Activity size={20} className="text-white" />
         </div>
         <div>
-          <h1 className="text-white font-bold text-lg leading-none">PeaMark</h1>
+          <h1 className="text-white font-bold text-lg leading-none">PEAMAK</h1>
           <p className="text-brand-300 text-xs mt-0.5">Billing System</p>
         </div>
       </div>

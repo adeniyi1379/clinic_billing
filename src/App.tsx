@@ -4,7 +4,6 @@ import { useAuthStore } from './store/auth'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ToastContainer } from './components/ui/Toast'
 import { LoginPage } from './pages/LoginPage'
-import { SignupPage } from './pages/SignupPage'
 import { AppLayout } from './components/AppLayout'
 import { DashboardPage } from './pages/DashboardPage'
 import { ServicesPage } from './pages/ServicesPage'
@@ -41,7 +40,7 @@ export default function App() {
       <ToastContainer />
       <Routes>
         <Route path="/login" element={session ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
-        <Route path="/signup" element={session ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
+        <Route path="/signup" element={<Navigate to="/login" replace />} />
         <Route
           element={
             <ProtectedRoute>
