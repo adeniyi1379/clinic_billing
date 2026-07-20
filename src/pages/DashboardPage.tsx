@@ -124,8 +124,8 @@ export function DashboardPage() {
             <div className="flex items-center gap-2">
               <Users size={18} className="text-brand-600" />
               <div>
-                <h2 className="text-base font-semibold text-slate-800">Revenue by Receptionist</h2>
-                <p className="text-xs text-slate-500 mt-0.5">Only staff with receptionist role are included.</p>
+                <h2 className="text-base font-semibold text-slate-800">Revenue by Staff</h2>
+                {/* <p className="text-xs text-slate-500 mt-0.5">Only staff with receptionist role are included.</p> */}
               </div>
             </div>
             <div className="inline-flex rounded-lg border border-slate-300 overflow-hidden bg-white">
