@@ -48,7 +48,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/dashboard" element={<ProtectedRoute permission="view_dashboard"><DashboardPage /></ProtectedRoute>} />
           <Route path="/billing" element={<ProtectedRoute permission="create_transaction"><BillingPage /></ProtectedRoute>} />
           <Route path="/transactions" element={<ProtectedRoute permission="view_transactions"><TransactionsPage /></ProtectedRoute>} />
           <Route path="/transactions/:id" element={<ProtectedRoute permission="view_transactions"><TransactionDetailPage /></ProtectedRoute>} />

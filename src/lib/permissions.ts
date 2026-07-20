@@ -30,14 +30,12 @@ const ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     'view_audit_log',
   ],
   cashier: [
-    'view_dashboard',
     'view_transactions',
     'create_transaction',
     'print_receipt',
     'view_reports',
   ],
   receptionist: [
-    'view_dashboard',
     'view_transactions',
     'create_transaction',
     'print_receipt',
