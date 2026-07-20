@@ -39,7 +39,7 @@ export default function App() {
     <>
       <ToastContainer />
       <Routes>
-        <Route path="/login" element={session ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
+        <Route path="/login" element={session ? <Navigate to="/billing" replace /> : <LoginPage />} />
         <Route path="/signup" element={<Navigate to="/login" replace />} />
         <Route
           element={
@@ -58,7 +58,7 @@ export default function App() {
           <Route path="/settings" element={<ProtectedRoute permission="manage_settings"><SettingsPage /></ProtectedRoute>} />
           <Route path="/audit-log" element={<ProtectedRoute permission="view_audit_log"><AuditLogPage /></ProtectedRoute>} />
         </Route>
-        <Route path="*" element={<Navigate to={session ? '/dashboard' : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={session ? '/billing' : '/login'} replace />} />
       </Routes>
     </>
   )

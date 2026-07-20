@@ -17,7 +17,7 @@ export function ProtectedRoute({ children, permission }: ProtectedRouteProps) {
   if (staff && !staff.is_active) return <Navigate to="/login" replace />
 
   if (permission && !hasPermission(staff.role, permission)) {
-    return <Navigate to="/dashboard" replace />
+    return <Navigate to="/billing" replace />
   }
 
   return <>{children}</>

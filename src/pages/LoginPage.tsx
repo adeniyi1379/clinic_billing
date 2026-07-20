@@ -28,7 +28,7 @@ export function LoginPage() {
     if (error) {
       setLocalError(error)
     } else {
-      navigate('/dashboard')
+      navigate('/billing')
     }
   }
 
